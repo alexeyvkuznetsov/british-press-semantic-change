@@ -32,7 +32,7 @@ PERIODS = ["1800s", "1810s", "1820s", "1830s", "1840s", "1850s",
            "1860s", "1870s", "1880s", "1890s", "1900s", "1910s"]
 MODEL_DIM = 200
 MODEL_SUFFIXES = [".model", ".model.wv.vectors.npy", ".model.syn1neg.npy"]
-TOPN = 200  # расширенный список кандидатов, без фильтрации
+TOPN = 500  # расширенный список кандидатов, без фильтрации
 REPORT_TOPN = 30  # объём списка для содержательного анализа
 OCR_RULES = ROOT / "ocr_exclusions.csv"
 
