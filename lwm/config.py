@@ -34,6 +34,7 @@ MODEL_DIM = 200
 MODEL_SUFFIXES = [".model", ".model.wv.vectors.npy", ".model.syn1neg.npy"]
 TOPN = 500  # расширенный список кандидатов, без фильтрации
 REPORT_TOPN = 30  # объём списка для содержательного анализа
+MIN_COUNT_INTERPRET = 50  # ниже порога баланс и соседи не интерпретируются
 OCR_RULES = ROOT / "ocr_exclusions.csv"
 
 # --- Слова, для которых сохраняются ближайшие соседи -----------------------
