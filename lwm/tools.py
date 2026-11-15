@@ -146,16 +146,46 @@ def build_cache(words=None, neighbor_targets=None, topn=C.TOPN):
     return cache
 
 
-def load_cache():
-    if not CACHE_FILE.exists():
-        raise FileNotFoundError("Кэш не найден. Сначала выполните 00_prepare_data.ipynb.")
-    with open(CACHE_FILE, "rb") as f: cache = pickle.load(f)
+def validate_cache(cache):
+    """Проверяет совместимость и структуру кэша, не изменяя сохранённые данные."""
     if cache.get("record") != C.ZENODO_RECORD or cache.get("version") != CACHE_VERSION:
-        raise ValueError("Кэш другого набора или формата. Перезапустите 00_prepare_data.ipynb.")
+        raise ValueError("Кэш другого набора или формата. Перестройте его в ноутбуке 00.")
     missing = set(C.all_words()) - set(cache["words"])
     if missing or not set(C.NEIGHBOR_TARGETS).issubset(cache["neighbor_targets"]) or cache["topn"] < C.TOPN:
         raise ValueError(f"Настройки изменились; перестройте кэш. Новые слова: {sorted(missing)}")
+    keys = ("vocab", "vocab_size", "vectors", "neighbors", "counts",
+            "corpus_total_words", "retained_tokens", "model_parameters")
+    for key in keys:
+        if set(cache[key]) != set(C.PERIODS):
+            raise ValueError(f"Кэш: неполный набор десятилетий в {key}")
+    for p in C.PERIODS:
+        present = set(cache["vocab"][p])
+        vectors = cache["vectors"][p]
+        if set(vectors) != present or not present.issubset(cache["words"]):
+            raise ValueError(f"{p}: не согласованы словарь и векторы")
+        if cache["model_parameters"][p]["vector_size"] != C.MODEL_DIM:
+            raise ValueError(f"{p}: несовместимая размерность модели")
+        if set(cache["counts"][p]) != present:
+            raise ValueError(f"{p}: отсутствуют частотные сведения")
+        if not cache["corpus_total_words"][p] or cache["corpus_total_words"][p] <= 0:
+            raise ValueError(f"{p}: отсутствует объём корпуса")
+        for w, v in vectors.items():
+            if v.shape != (C.MODEL_DIM,) or not np.isfinite(v).all() or not np.isclose(np.linalg.norm(v), 1, atol=1e-5):
+                raise ValueError(f"{p}: некорректный нормированный вектор {w}")
+        for w in set(C.NEIGHBOR_TARGETS) & present:
+            neighbors = cache["neighbors"][p].get(w, [])
+            if len(neighbors) < C.TOPN:
+                raise ValueError(f"{p}: неполный список соседей {w}")
     return cache
+
+
+def load_cache():
+    """Загружать только доверенный pickle (файл проекта или собственный кэш)."""
+    if not CACHE_FILE.exists():
+        raise FileNotFoundError("Кэш не найден. Сначала выполните 00_prepare_data.ipynb.")
+    with open(CACHE_FILE, "rb") as f:
+        cache = pickle.load(f)
+    return validate_cache(cache)
 
 
 def vocabulary_table(cache, words):

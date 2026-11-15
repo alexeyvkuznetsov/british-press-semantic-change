@@ -53,24 +53,27 @@ def diagnose(review, decisions, spell, *, topn=30, suggest=True, dictionary_vers
     for c in ['occurrences','raw_top30_hits','current_top30_hits','excluded_occurrences']:
         stats[c] = stats[c].fillna(0).astype(int)
     words = stats.loc[stats['occurrences'].gt(0),'neighbor'].tolist()
-    unknown = spell.unknown(words)
-    stats['spellchecker_unknown'] = stats['neighbor'].map(lambda w: w in unknown)
+    unknown = spell.unknown(words) if spell is not None else set()
+    # Пустое значение означает, что словарь в данном запуске не использовался.
+    stats['spellchecker_unknown'] = (stats['neighbor'].map(lambda w: w in unknown)
+                                     if spell is not None else pd.NA)
     stats['in_current_data'] = stats['occurrences'].gt(0)
     stats['dictionary_version'] = dictionary_version
-    stats['suggestion_distance'] = distance
+    stats['suggestion_distance'] = distance if spell is not None else pd.NA
     stats['suggested_correction'] = ''
     pending = stats['decision'].isin(['','review'])
     active = stats['current_top30_hits'].gt(0)
     # Не используем unknown как правило исключения. Не предлагаем исправления
     # для каждой из тысяч форм: только для актуальных кандидатов без решения.
-    if suggest:
+    if suggest and spell is not None:
         for i, word in stats.loc[active & pending & stats['spellchecker_unknown'],'neighbor'].items():
             correction = spell.correction(word)
             if correction and correction != word:
                 stats.at[i,'suggested_correction'] = correction
     stats['priority'] = 'later'
     stats.loc[active & pending, 'priority'] = 'check_top30'
-    stats.loc[active & pending & stats['spellchecker_unknown'], 'priority'] = 'unknown_top30'
+    if spell is not None:
+        stats.loc[active & pending & stats['spellchecker_unknown'], 'priority'] = 'unknown_top30'
     stats.loc[~pending, 'priority'] = 'decided'
     stats.loc[~stats['in_current_data'], 'priority'] = 'not_in_current_data'
     stats['keep_rule_conflict'] = stats['decision'].eq('keep') & stats['excluded_occurrences'].gt(0)
@@ -90,3 +93,52 @@ def save_review(table, path):
     tmp = path.with_name(path.name + '.tmp')
     table.to_csv(tmp, index=False, encoding='utf-8-sig')
     tmp.replace(path)
+
+
+def validate_no_conflicts(review, decisions):
+    """Ничего не переопределяет автоматически: keep не отменяет точное исключение."""
+    keep = set(decisions.loc[decisions['decision'].eq('keep'), 'neighbor'])
+    conflicts = review.loc[review['excluded'] & review['neighbor'].isin(keep)]
+    if not conflicts.empty:
+        raise ValueError(f"Конфликт keep и правила исключения: {sorted(conflicts['neighbor'].unique())}")
+
+
+def article_neighbors(review, cache, decisions, targets, min_count=50, topn=30):
+    """Отчёт по парам словоформа–десятилетие первой статьи.
+
+    Просмотрено = исходный ранг последнего сохранённого соседа.
+    Исключено = просмотрено − число сохранённых (не весь список Top-500).
+    Неполный Top-N не допускается; отсутствие решения не считается keep.
+    """
+    pairs = [(p, w, cache['counts'][p][w]) for p in cache['counts'] for w in targets
+             if cache['counts'][p].get(w, 0) >= min_count]
+    rows, selected = [], []
+    decision_map = decisions.set_index('neighbor')['decision']
+    for p, w, count in pairs:
+        sub = review.loc[(review['period'] == p) & (review['target'] == w)]
+        kept = sub.loc[~sub['excluded'] & sub['filtered_rank'].le(topn)].copy()
+        if len(kept) != topn:
+            raise ValueError(f"{p}/{w}: только {len(kept)} сохранённых соседей вместо {topn}")
+        kept['decision'] = kept['neighbor'].map(decision_map).fillna('')
+        viewed = int(kept['raw_rank'].max())
+        excluded = int(sub.loc[sub['raw_rank'].le(viewed), 'excluded'].sum())
+        if viewed != excluded + topn:
+            raise ValueError(f"{p}/{w}: несогласованные ранги и исключения")
+        rows.append(dict(period=p, target=w, count=count, viewed=viewed, excluded=excluded,
+                         retained=topn, excluded_fraction=excluded/viewed,
+                         pending=int(kept['decision'].ne('keep').sum())))
+        selected.append(kept)
+    if not selected:
+        raise ValueError("Нет пар, удовлетворяющих частотному порогу")
+    coverage = pd.DataFrame(rows)
+    return pd.concat(selected, ignore_index=True), coverage
+
+
+def article_summary(coverage):
+    viewed = int(coverage['viewed'].sum())
+    excluded = int(coverage['excluded'].sum())
+    return pd.DataFrame([dict(pairs=len(coverage), viewed=viewed, excluded=excluded,
+                              retained=int(coverage['retained'].sum()),
+                              excluded_fraction=excluded/viewed,
+                              half_or_more=int((2*coverage['excluded'] >= coverage['viewed']).sum()),
+                              pending=int(coverage['pending'].sum()))])

@@ -1,4 +1,7 @@
-data/
+data/*
+!data/cache_2023/
+data/cache_2023/*
+!data/cache_2023/cache.pkl
 models/
 *.model
 *.model.*.npy

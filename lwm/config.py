@@ -36,11 +36,14 @@ TOPN = 500  # расширенный список кандидатов, без �
 REPORT_TOPN = 30  # объём списка для содержательного анализа
 MIN_COUNT_INTERPRET = 50  # ниже порога баланс и соседи не интерпретируются
 OCR_RULES = ROOT / "ocr_exclusions.csv"
+OCR_DECISIONS = ROOT / "ocr_decisions.csv"
 
 # --- Слова, для которых сохраняются ближайшие соседи -----------------------
-NEIGHBOR_TARGETS = ["imperialism", "imperialist", "imperialists", "imperial", "empire",
-                    "emperor", "empress", "jingoism", "jingo", "czar", "russia", "russian",
-                    "russophobia", "autocracy", "tsar"]
+IMPERIAL_LEXICON_TARGETS = ["imperialism", "imperialist", "imperialists", "imperial", "empire",
+                            "emperor", "empress", "jingoism"]
+# Дополнительные слова общего проекта; не входят в статистику статьи 1.
+RUSSIA_NEIGHBOR_TARGETS = ["jingo", "czar", "russia", "russian", "russophobia", "autocracy", "tsar"]
+NEIGHBOR_TARGETS = IMPERIAL_LEXICON_TARGETS + RUSSIA_NEIGHBOR_TARGETS
 
 # Слова, отсутствие которых в части десятилетий упоминается в статье
 PROBE_WORDS = ["imperialism", "imperialist", "imperialists", "jingo", "jingoism",
@@ -51,15 +54,16 @@ PROBE_WORDS = ["imperialism", "imperialist", "imperialists", "jingo", "jingoism"
 # положение слова — показатель ассоциации s(w, A, B) (Caliskan et al. 2017),
 # в предыдущей работе автора названный балансом семантических полей. «Своё» — слова, обозначающие
 # британскую монархию и её владения, «чужое» — иностранные державы и их правители
-# (Koebner & Schmidt 1964 о «чужих» империях середины века). Наборы фиксированы для всех десятилетий; наличие проверяется. Базовая линия — контрольное условие (Dubossarsky et al. 2017).
-BALANCE_TARGETS = ["imperialism", "imperialist", "imperialists", "imperial", "empire", "emperor", "empress", "jingoism", "jingo"]
+# (Koebner & Schmidt 1964 о «чужих» империях середины века). Наборы фиксированы для всех десятилетий; наличие проверяется. Базовая линия — описательный ориентир по государственной лексике.
+# jingo сохраняется в общих таблицах для совместимости с прежними результатами.
+BALANCE_TARGETS = IMPERIAL_LEXICON_TARGETS + ["jingo"]
 OWN = ["british", "britain", "colonies", "colonial", "india", "canada", "dominion", "queen"]
 FOREIGN = ["france", "french", "napoleon", "bonaparte", "austria", "austrian",
            "russia", "russian", "turkey", "ottoman", "germany", "german"]
 OWN_GEOGRAPHIC = ["britain", "british", "england", "english"]
 FOREIGN_GEOGRAPHIC = ["france", "french", "austria", "austrian", "russia", "russian",
                       "turkey", "turkish", "germany", "german"]
-BASE = ["kingdom", "government", "army", "nation", "crown"]  # базовая линия дрейфа
+BASE = ["kingdom", "government", "army", "nation", "crown"]  # ориентир по государственной лексике
 
 # --- Семантические оси (раздел 4 статьи) ----------------------------------
 # Пары антонимов (отрицательный полюс, положительный полюс), ось — среднее направлений внутри пар (Kozlowski et al. 2019).
