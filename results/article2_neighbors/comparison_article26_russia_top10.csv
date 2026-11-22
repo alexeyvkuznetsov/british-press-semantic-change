@@ -1,0 +1,13 @@
+﻿period,old_top10,new_top10,exact_positions_equal,set_overlap,words_entered,words_removed
+1800-е,sweden; prussia; austria; denmark; france; autocrat; russian; petersburgh; continental; mediation,sweden; prussia; austria; denmark; france; kuala; autocrat; russian; petersburgh; rus,5,8,kuala; rus,continental; mediation
+1810-е,austria; prussia; sweden; emperor; denmark; germany; finland; saxony; autocrat; russian,austria; prussia; sweden; emperor; rossi; denmark; germany; finland; saxony; autocrat,4,9,rossi,russian
+1820-е,prussia; austria; persia; porte; russian; turkey; emperor; schah; ottoman; moldavia,prussia; austria; persia; porte; russian; turkey; emperor; ruda; schah; ottoman,7,9,ruda,moldavia
+1830-е,austria; prussia; turkey; emperor; autocrat; czar; poland; porte; wallachia; persia,austria; prussia; turkey; emperor; autocrat; czar; poland; porte; wallachia; persia,10,10,,
+1840-е,austria; prussia; emperor; germany; hungary; france; russian; turkey; czar; moldavia,austria; prussia; emperor; germany; hungary; france; russian; turkey; czar; moldavia,10,10,,
+1850-е,austria; czar; turkey; porte; principalities; persia; prussia; danubian; france; russian,austria; czar; turkey; porte; principalities; persia; prussia; danubian; france; russian,10,10,,
+1860-е,austria; prussia; france; germany; czar; emperor; sardinia; saxony; europe; sweden,austria; prussia; france; germany; czar; emperor; sardinia; saxony; europe; sweden,10,10,,
+1870-е,austria; prussia; germany; servia; czar; turkey; montenegro; italy; roumania; belgium,austria; prussia; germany; servia; czar; turkey; montenegro; italy; roumania; belgium,10,10,,
+1880-е,austria; bulgaria; germany; persia; roumania; bulgarian; servia; russian; italy; russians,austria; bulgaria; germany; persia; roumania; bulgarian; servia; russian; italy; russians,10,10,,
+1890-е,austria; europe; russian; spain; bulgaria; greece; italy; czar; hungary; persia,austria; europe; russian; spain; bulgaria; greece; italy; czar; hungary; persia,10,10,,
+1900-е,austria; bulgaria; japan; czar; germany; spain; european; manchuria; servia; europe,austria; bulgaria; japan; czar; germany; spain; european; manchuria; servia; europe,10,10,,
+1910-е,austria; germany; italy; allies; rumania; poland; bulgaria; belgium; servia; europe,austria; germany; italy; allies; rumania; poland; bulgaria; belgium; servia; europe,10,10,,
