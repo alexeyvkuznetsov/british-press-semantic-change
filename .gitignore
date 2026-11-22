@@ -1,7 +1,12 @@
+# Keep only project inputs under data/; large full Word2Vec models are never tracked.
 data/*
 !data/cache_2023/
 data/cache_2023/*
 !data/cache_2023/cache.pkl
+!data/article2_neighbors/
+data/article2_neighbors/*
+!data/article2_neighbors/*.csv
+!data/article2_neighbors/*.md
 models/
 *.model
 *.model.*.npy
@@ -9,3 +14,26 @@ models/
 .ipynb_checkpoints/
 __pycache__/
 .venv/
+
+# Regenerable / historical development exports. Published core outputs stay tracked.
+00_prepare_data_updated.ipynb
+results/article2_neighbors/for_chat/
+results/article2_neighbors/raw_top100/
+results/article2_neighbors/nonblocking_review.csv
+results/article2_neighbors/comparison_article26_russia_top10.csv
+results/tables/03_neighbors_tsar_raw_top200.csv
+results/tables/05_neighbors_article2_top30.csv
+results/tables/05_ocr_article2_coverage.csv
+results/tables/05_ocr_article2_summary.csv
+results/figures/02_axes_pair_agreement.png
+results/figures/02_axes_pair_arrows.png
+results/figures/02_countries_on_axes.png
+results/figures/05_axis_pair_sensitivity.png
+results/figures/05_britain_russia.png
+results/figures/fig1_russia_axes_with_pair_ranges.*
+results/figures/fig2_britain_russia_color.*
+results/figures/fig2_britain_russia_with_pair_ranges.*
+results/figures/fig2_russia_axes.png
+results/figures/fig3_countries_liberty.png
+results/figures/fig3_countries_selected_decades.*
+results/figures/fig3_countries_selected_decades_color.*
