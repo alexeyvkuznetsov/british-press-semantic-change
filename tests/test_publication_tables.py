@@ -52,7 +52,10 @@ class PublicationTables(unittest.TestCase):
             p = pd.read_csv(TABLES / f'05_projections_{axis}.csv', index_col=0).loc[PERIODS]
             expected = p['russia'] - p.drop(columns='russia').mean(axis=1)
             actual = diff[diff['ось'] == axis].set_index('десятилетие').loc[PERIODS, 'разность']
-            np.testing.assert_allclose(actual, expected, rtol=0, atol=2e-6)
+            # Both projection and difference CSVs are rounded to 4 decimals.
+            # Worst-case error: 0.00005 (Russia) + 0.00005 (mean of others)
+            # + 0.00005 (exported difference). Allow floating-point roundoff.
+            np.testing.assert_allclose(actual, expected, rtol=0, atol=1.5e-4 + 1e-12)
 
 
 if __name__ == '__main__':

@@ -63,7 +63,9 @@ class OCRTests(unittest.TestCase):
 
     def test_published_neighbors(self):
         reference = pd.read_csv(C.TAB_DIR/'03_neighbors_review.csv', keep_default_na=False)
-        computed = self.review.fillna('')
+        # Missing filtered ranks are numeric NaNs; pd.to_numeric below
+        # already handles them. Do not fill numeric columns with strings.
+        computed = self.review
         # CSV mixes empty strings and numeric ranks; compare textual fields and ranks separately.
         for col in ['period','target','raw_rank','neighbor','excluded','reason']:
             self.assertEqual(reference[col].tolist(), computed[col].tolist())
